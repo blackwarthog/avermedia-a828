@@ -162,7 +162,7 @@ static struct usb_driver my_driver = {
 
 static int __init mod_init(void)
 {
-	printk(KERN_INFO "nin(%s:%d):: init ("__DATE__" "__TIME__")\n", __func__, __LINE__);
+	printk(KERN_INFO "nin(%s:%d):: init\n", __func__, __LINE__);
 	return UsbModInit((pUsb_driver)&my_driver);
 }
 

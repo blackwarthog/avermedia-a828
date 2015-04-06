@@ -167,7 +167,11 @@ void SysSetUpVideoVma(void *v, void *mmap_context)
 	struct vm_area_struct *vma = v;
 
 	vma->vm_ops   = &vbuf_vm_ops;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,16,0)
 	vma->vm_flags |= VM_DONTEXPAND | VM_RESERVED;
+#else
+	vma->vm_flags |= VM_DONTEXPAND;
+#endif
 	vma->vm_flags &= ~VM_IO;
 	vma->vm_private_data = mmap_context;
 }

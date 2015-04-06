@@ -78,6 +78,9 @@ shall govern.
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
 #include <linux/smp_lock.h>
 #endif
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,16,0)
+#include <linux/kthread.h>
+#endif
 #include <linux/sched.h> 
 #include "osdep_th2.h"
 #include "osdep.h"
@@ -85,7 +88,11 @@ shall govern.
 
 int SysKernelThread(void (*func)(void *),void *thObj)
 {
-        return kernel_thread((int (*)(void *))func,thObj,0);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,16,0)
+    return kernel_thread((int (*)(void *))func,thObj,0);
+#else
+    return kthread_run((int (*)(void *))func,thObj,0) == NULL;
+#endif
 }
 
 int SysSetThreadName(const char *name) 
@@ -95,8 +102,10 @@ int SysSetThreadName(const char *name)
         daemonize();
         sigfillset(&current->blocked);
         sprintf(current->comm, "%s", name);
-#else
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(3,16,0)
         daemonize("%s", name);
+        allow_signal(SIGTERM);
+#else
         allow_signal(SIGTERM);
 #endif
         siginitsetinv(&current->blocked, sigmask(SIGKILL)|sigmask(SIGINT)|                        sigmask(SIGTERM));
